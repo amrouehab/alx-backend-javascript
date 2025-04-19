@@ -1,0 +1,1 @@
+Solution ofr promises tasks
