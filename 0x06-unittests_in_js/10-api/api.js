@@ -1,7 +1,7 @@
 const express = require('express');
 
 const app = express();
-const port = 7865;
+const PORT = 7865;
 
 app.use(express.json());
 
@@ -10,8 +10,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/cart/:id(\\d+)', (req, res) => {
-  const id = req.params.id;
-  res.send(`Payment methods for cart ${id}`);
+  res.send(`Payment methods for cart ${req.params.id}`);
 });
 
 app.get('/available_payments', (req, res) => {
@@ -24,16 +23,16 @@ app.get('/available_payments', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  const userName = req.body.userName;
-  res.send(`Welcome ${userName}`);
+  const { userName } = req.body;
+  if (userName) {
+    res.send(`Welcome ${userName}`);
+  } else {
+    res.status(400).send('Bad Request');
+  }
 });
 
-app.use((req, res) => {
-  res.status(404).send('Not Found');
-});
-
-app.listen(port, () => {
-  console.log(`API available on localhost port ${port}`);
+app.listen(PORT, () => {
+  console.log(`API available on localhost port ${PORT}`);
 });
 
 module.exports = app;
