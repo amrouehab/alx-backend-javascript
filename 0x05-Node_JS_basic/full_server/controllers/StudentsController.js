@@ -1,39 +1,45 @@
-const readDatabase = require('../utils/readDatabase');
+import readDatabase from '../utils';
 
 class StudentsController {
-  static getAllStudents(req, res) {
-    const path = process.argv[2];
-    readDatabase(path)
-      .then((fields) => {
-        let response = 'This is the list of our students\n';
-        for (const [field, students] of Object.entries(fields).sort()) {
-          response += `Number of students in ${field}: ${students.length}. List: ${students.join(', ')}\n`;
+  static getAllStudents(request, response) {
+    const databasePath = process.argv[2];
+    readDatabase(databasePath)
+      .then((students) => {
+        const responseParts = ['This is the list of our students'];
+        const sortedFields = Object.keys(students).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+
+        for (const field of sortedFields) {
+          const list = students[field].join(', ');
+          responseParts.push(`Number of students in ${field}: ${students[field].length}. List: ${list}`);
         }
-        res.status(200).send(response.trim());
+        response.status(200).send(responseParts.join('\n'));
       })
       .catch(() => {
-        res.status(500).send('Cannot load the database');
+        response.status(500).send('Cannot load the database');
       });
   }
 
-  static getAllStudentsByMajor(req, res) {
-    const path = process.argv[2];
-    const { major } = req.params;
+  static getAllStudentsByMajor(request, response) {
+    const databasePath = process.argv[2];
+    const { major } = request.params;
 
-    if (!['CS', 'SWE'].includes(major)) {
-      return res.status(500).send('Major parameter must be CS or SWE');
+    if (major !== 'CS' && major !== 'SWE') {
+      response.status(500).send('Major parameter must be CS or SWE');
+      return;
     }
 
-    readDatabase(path)
-      .then((fields) => {
-        const students = fields[major];
-        res.status(200).send(`List: ${students.join(', ')}`);
+    readDatabase(databasePath)
+      .then((students) => {
+        if (students[major]) {
+          response.status(200).send(`List: ${students[major].join(', ')}`);
+        } else {
+          response.status(200).send('List: ');
+        }
       })
       .catch(() => {
-        res.status(500).send('Cannot load the database');
+        response.status(500).send('Cannot load the database');
       });
   }
 }
 
-module.exports = StudentsController;
-
+export default StudentsController;
